@@ -1,0 +1,571 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mappa ISTAT FUA</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .glassmorphism {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background-color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(209, 213, 219, 0.3);
+    }
+
+    .map-container {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .legend-item {
+      transition: all 0.2s ease-in-out;
+    }
+
+    .legend-item:hover {
+      transform: translateX(2px);
+    }
+
+    .search-input:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    #map {
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    /* Legenda bianca */
+    .info {
+      padding: 8px 12px;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.2;
+      color: #374151;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.25rem;
+      }
+      #map {
+        height: 400px !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="relative overflow-hidden">
+    <div class="glassmorphism border-b border-white/20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-4 flex-wrap gap-3">
+          <div class="flex items-center space-x-3">
+            
+            <img src="https://www.reshot.com/preview-assets/icons/UCYHESA36V/maps-UCYHESA36V.svg" alt="Logo mappa" class="w-10 h-10 rounded-xl shadow-md" />
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Mappa ISTAT Aree Funzionali Urbane | Beta
+            </h1>
+          </div>
+          <div class="hidden md:flex items-center space-x-3 text-sm text-slate-600">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="database" class="w-4 h-4"></i>
+              <span>Dati ISTAT 2011</span>
+            </div>
+            <div class="w-px h-4 bg-slate-300"></div>
+            <div class="flex items-center space-x-2">
+              <i data-lucide="leaf" class="w-4 h-4 text-green-600"></i>
+              <span>Incentivi Auto 2025</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenuto -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Map Area -->
+            <div class="lg:col-span-3">
+                <div class="glassmorphism rounded-2xl p-6 map-container animate-fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-slate-900">Mappa Interattiva dei Comuni</h2>
+                        <div class="flex items-center space-x-2 text-sm text-slate-500">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>Aree Funzionali Urbane</span>
+                        </div>
+                    </div>
+                    <div id="map" style="height: 600px;" aria-label="Mappa interattiva dei comuni italiani"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Search Panel -->
+<!--                <div class="glassmorphism rounded-2xl p-6 animate-slide-up">
+                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
+                        <i data-lucide="search" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        Ricerca Comune
+                    </h3>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="search-comune" 
+                            class="w-full px-4 py-3 pr-10 bg-white/70 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent search-input transition-all duration-200"
+                            placeholder="Inserisci nome comune..."
+                        />
+                        <i data-lucide="map-pin" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                    </div>
+                </div>-->
+
+                <!-- Legend Panel -->
+                <div class="glassmorphism rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.1s">
+                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
+                        <i data-lucide="palette" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        Legenda FUA
+                    </h3>
+                    <div id="legend" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar"></div>
+                </div>
+
+                <!-- Incentives Info Panel -->
+                <div class="glassmorphism rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.2s">
+                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
+                        <i data-lucide="zap" class="w-5 h-5 mr-2 text-green-600"></i>
+                        Incentivi Veicoli Elettrici 2025
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                            <div class="flex items-center mb-2">
+                                <i data-lucide="users" class="w-4 h-4 text-blue-600 mr-2"></i>
+                                <span class="text-sm font-medium text-blue-800">Persone Fisiche (M1)</span>
+                            </div>
+                            <p class="text-xs text-blue-700 mb-1">• €11.000 se ISEE ≤ €30.000</p>
+                            <p class="text-xs text-blue-700">• €9.000 se ISEE €30.000-€40.000</p>
+                            <p class="text-xs text-slate-600 mt-1">Solo residenti in FUA, con rottamazione Euro ≤5</p>
+                        </div>
+                        
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-3">
+                            <div class="flex items-center mb-2">
+                                <i data-lucide="building" class="w-4 h-4 text-green-600 mr-2"></i>
+                                <span class="text-sm font-medium text-green-800">Microimprese (N1/N2)</span>
+                            </div>
+                            <p class="text-xs text-green-700 mb-1">• 30% del prezzo (max €20.000)</p>
+                            <p class="text-xs text-green-700">• Max 2 veicoli per impresa</p>
+                            <p class="text-xs text-slate-600 mt-1">Sede in FUA, regime de minimis</p>
+                        </div>
+                        
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                            <div class="flex items-center mb-2">
+                                <i data-lucide="info" class="w-4 h-4 text-amber-600 mr-2"></i>
+                                <span class="text-sm font-medium text-amber-800">Requisiti</span>
+                            </div>
+                            <p class="text-xs text-amber-700 mb-1">• Scadenza: 30 giugno 2026</p>
+                            <p class="text-xs text-amber-700">• Dotazione: €597.320.000</p>
+                            <p class="text-xs text-slate-600 mt-1">PNRR M2C2 - Investimento 4.5</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Footer Info -->
+    <div class="mt-8 glassmorphism rounded-2xl p-6 animate-fade-in" style="animation-delay: 0.3s">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="space-y-3">
+          <h4 class="font-semibold text-slate-900 flex items-center">
+            <i data-lucide="database" class="w-5 h-5 mr-2 text-blue-600"></i>
+            Fonti Dati
+          </h4>
+          <div class="space-y-2 text-sm text-slate-600">
+            <p>• Confini comuni: <a href="https://www.confini-amministrativi.it" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 transition-colors">OnData - Confini Amministrativi Italiani</a></p>
+            <p>• Zone FUA: <a href="https://situas-servizi.istat.it/publish/reportspooljson?pfun=91&pdata=01/01/2018" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800">ISTAT</a></p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="font-semibold text-slate-900 flex items-center">
+            <i data-lucide="info" class="w-5 h-5 mr-2 text-blue-600"></i>
+            Informazioni
+          </h4>
+          <div class="text-sm text-slate-600">
+            <p>Mappa interattiva delle Aree Funzionali Urbane (FUA) ISTAT Comuni e zone aggiornati al 2011</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="font-semibold text-slate-900 flex items-center">
+            <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-amber-600"></i>
+            Disclaimer
+          </h4>
+          <div class="text-sm text-slate-600">
+            <p class="text-amber-700 font-medium">Questo sito non è ufficiale.</p>
+            <p>I dati sugli incentivi sono estratti da fonti governative aggiornate a settembre 2025.</p>
+            <p><a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-blue-700">Decreto in Gazzetta Ufficiale</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<footer class="bg-white border-t border-slate-200 py-6">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col items-center text-sm text-slate-600 space-y-3">
+    <div class="flex items-center justify-center space-x-2 text-center">
+      <span class="font-semibold">un progetto open</span>
+      <img src="https://i.movity.it/movity.png" alt="movity logo" class="h-[20px] object-contain">
+    </div>
+
+
+    <div class="text-center">
+      Licenza <span class="font-mono">MIT</span>
+    </div>
+
+    <a href="https://github.com/movityit/afu/" target="_blank" rel="noopener" 
+       class="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.2c-3.2.7-3.8-1.4-3.8-1.4-.5-1.2-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.6 1.2 1.6 1.2 1 .1.7 2.1 3.3 1.5.1-.8.4-1.3.8-1.6-2.6-.3-5.4-1.3-5.4-6 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.2 11.2 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.9.1 3.2.8.9 1.2 2 1.2 3.2 0 4.7-2.8 5.7-5.4 6 .4.3.8 1 .8 2v3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z"/>
+      </svg>
+      <span>GitHub</span>
+    </a>
+
+  </div>
+</footer>
+
+
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="fixed inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-500">
+        <div class="text-center">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+                <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-indigo-600 rounded-full animate-spin mx-auto" style="animation-duration: 0.75s; animation-direction: reverse;"></div>
+            </div>
+            <div class="mt-4 text-slate-700 font-medium">Caricamento dati...</div>
+            <div class="mt-2 text-sm text-slate-500">Elaborazione mappe e incentivi</div>
+        </div>
+    </div>
+
+
+  <script>
+  (function(){
+    // CONFIG: URL ufficiali (lasciare così come fornite)
+    const ISTAT_URL = "https://afu.movity.it/geo/report.json";
+    const GEOJSON_URL = "https://afu.movity.it/geo/comuni_2011.geojson";
+
+    // UI refs
+    const loadingEl = document.getElementById('loading');
+    const legendEl = document.getElementById('legend');
+    const uploadIstat = document.getElementById('upload-istat');
+    const uploadGeo = document.getElementById('upload-geo');
+    const proxySelect = document.getElementById('istat-proxy');
+    const reloadBtn = document.getElementById('reload-btn');
+
+    // Map init
+    const map = L.map('map', {
+      preferCanvas: true,
+      zoomSnap: 0.5,
+      zoomDelta: 0.5
+    }).setView([41.8719, 12.5674], 6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        maxZoom: 19
+      }).addTo(map);
+
+    // Info control
+    const info = L.control({position: 'topright'});
+    info.onAdd = function() {
+      this._div = L.DomUtil.create('div', 'info');
+      this._div.innerHTML = '<em>Passa sopra un comune per i dettagli</em>';
+      return this._div;
+    };
+    info.update = function(props) {
+      if (!props) {
+        this._div.innerHTML = '<em>Passa sopra un comune per i dettagli</em>';
+      } else {
+        this._div.innerHTML = `<strong>${props.COMUNE || props.name || props.comune || '—'}</strong><br/>
+          FUA: ${props.DEN_FUA || '—'}<br/>
+          Provincia: ${props.DEN_UTS_COM || props.DEN_UTS || props.sigla || '—'}<br/>
+          Regione: ${props.DEN_REG_COM || props.den_reg || '—'}`;
+      }
+    };
+    info.addTo(map);
+
+    // Palette (riutilizzabile)
+    const PALETTE = ["#0073e6","#28a745","#ffc107","#dc3545","#6f42c1","#17a2b8","#fd7e14","#20c997","#6610f2","#e83e8c",
+                     "#20a8d8","#5a6268","#fd7f6f","#7bdff2","#b2e061","#f9a3a4","#ef8a62","#b3de69"];
+    const fuaColorMap = {};
+    let fuaCounter = 0;
+    function getColorForFua(fua) {
+      if (!fua) return '#cccccc';
+      if (!fuaColorMap[fua]) fuaColorMap[fua] = PALETTE[(fuaCounter++) % PALETTE.length];
+      return fuaColorMap[fua];
+    }
+
+    // GeoJSON layer reference
+    let geoLayer = null;
+
+    // normalize codice ISTAT to 6-digit string (strip non-digits)
+    function normalizeCodeRaw(v) {
+      if (v === undefined || v === null) return null;
+      const s = String(v).replace(/\D/g,'');
+      if (!s) return null;
+      return s.padStart(6, '0');
+    }
+
+    // get candidate ISTAT codes from feature properties (tries many common names)
+    function getFeatureIstatCode(props) {
+      if (!props) return null;
+      const candidates = [
+        props.com_istat_code,
+        props.com_istat_code_num,
+        props.PRO_COM_T,
+        props.PRO_COM,
+        props.pro_com_t,
+        props.pro_com,
+        props.PRO_COM_T || props.PRO_COM,
+        props.COMUNE && props.PRO_COM_T ? props.PRO_COM_T : null,
+        props.comune && props.comune.PRO_COM_T ? props.comune.PRO_COM_T : null,
+        props.COD_COM || props.CODICE || props.cod_istat
+      ];
+      for (const c of candidates) {
+        const n = normalizeCodeRaw(c);
+        if (n) return n;
+      }
+      // sometimes openpolis uses 'cod_istat' or 'comune' nested; try generic scan
+      for (const k of Object.keys(props)) {
+        if (/istat/i.test(k) || /pro_com/i.test(k) || /cod.*com/i.test(k)) {
+          const n = normalizeCodeRaw(props[k]);
+          if (n) return n;
+        }
+      }
+      return null;
+    }
+
+    // style/highlight functions
+    function styleFeature(feature) {
+      const fua = feature.properties && (feature.properties.DEN_FUA || feature.properties.DEN_FUA || feature.properties.DEN_FUA);
+      return {
+        color: "#444",
+        weight: 0.5,
+        fillOpacity: 0.7,
+        fillColor: getColorForFua(fua)
+      };
+    }
+    function highlightFeature(e) {
+      const layer = e.target;
+      layer.setStyle({ weight: 2, color: '#000', fillOpacity: 0.95 });
+      if (!L.Browser.ie && !L.Browser.edge) layer.bringToFront();
+      info.update(layer.feature.properties);
+    }
+    function resetHighlight(e) {
+      geoLayer.resetStyle(e.target);
+      info.update();
+    }
+    function zoomToFeature(e) {
+      map.fitBounds(e.target.getBounds(), { maxZoom: 12 });
+      e.target.openPopup();
+    }
+
+    // populate legend (fuaColorMap)
+    function renderLegend() {
+      const items = Object.keys(fuaColorMap).sort((a,b)=>a.localeCompare(b)).map(fua=>{
+        return `<div style="display:flex;align-items:center;margin:4px 0">
+          <span style="width:16px;height:12px;background:${fuaColorMap[fua]};display:inline-block;margin-right:8px;border:1px solid #999"></span>
+          <small>${fua}</small>
+        </div>`;
+      }).join('');
+      legendEl.innerHTML = items || '<small class="text-muted">Legenda non disponibile</small>';
+    }
+
+    // join logic: istatData.resultset -> map by normalized code
+    function buildIstatMap(istatData) {
+      const map = new Map();
+      if (!istatData || !istatData.resultset) return map;
+      for (const row of istatData.resultset) {
+        const k1 = normalizeCodeRaw(row.PRO_COM_T);
+        const k2 = normalizeCodeRaw(row.PRO_COM);
+        if (k1) map.set(k1, row);
+        if (!map.has(k2) && k2) map.set(k2, row);
+      }
+      return map;
+    }
+
+    // Attempt fetch with optional proxy prefix
+    async function tryFetchJson(url, proxyPrefix='') {
+      const full = (proxyPrefix || '') + url;
+      const resp = await fetch(full);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+      const ct = resp.headers.get('content-type') || '';
+      if (ct.indexOf('application/json') === -1 && ct.indexOf('text/') === 0) {
+        // could still be JSON (some proxies return text)
+      }
+      return resp.json();
+    }
+
+    async function loadAndRender({ useProxy=false, istatFromFile=null, geoFromFile=null } = {}) {
+      // clear previous state
+      fuaCounter = 0;
+      for (const k in fuaColorMap) delete fuaColorMap[k];
+      if (geoLayer) { map.removeLayer(geoLayer); geoLayer = null; }
+      legendEl.innerHTML = '';
+      info.update();
+
+      loadingEl.style.display = 'flex';
+      try {
+        // 1) get ISTAT data (either from uploaded file or fetch)
+        let istatData = null;
+        if (istatFromFile) {
+          istatData = istatFromFile;
+        } else {
+          try {
+            const proxyPrefix = useProxy ? proxySelect.value : '';
+            // if proxy selected but user left select empty, proxyPrefix = ''
+            const prefix = (useProxy && proxyPrefix) ? proxyPrefix : '';
+            istatData = await tryFetchJson(ISTAT_URL, prefix);
+          } catch (e1) {
+            // try again with known public proxy AllOrigins if not already tried
+            console.warn('Prima fetch ISTAT fallita:', e1.message);
+            try {
+              istatData = await tryFetchJson(ISTAT_URL, 'https://api.allorigins.win/raw?url=');
+            } catch (e2) {
+              console.warn('Proxy fallback fallito:', e2.message);
+              // fallthrough, istatData resterà null -> continueremo mostrando i confini senza FUA
+            }
+          }
+        }
+
+        // 2) get GeoJSON data (from file or remote)
+        let geojson = null;
+        if (geoFromFile) {
+          geojson = geoFromFile;
+        } else {
+          try {
+            geojson = await tryFetchJson(GEOJSON_URL);
+          } catch (e) {
+            console.error('Errore fetch GeoJSON:', e.message);
+            // fall back: ask user to upload local geojson (handled by UI)
+            throw new Error('Impossibile caricare il GeoJSON da GitHub. Carica un file geojson locale tramite il controllo "Carica GeoJSON".');
+          }
+        }
+
+        // 3) build istatMap
+        const istatMap = buildIstatMap(istatData);
+
+        // 4) attach ISTAT properties to features if match found
+        let matched = 0;
+        for (const feat of geojson.features) {
+          const code = getFeatureIstatCode(feat.properties);
+          if (code && istatMap.has(code)) {
+            const istRow = istatMap.get(code);
+            // merge properties without overwriting geo props (but allow override)
+            feat.properties = Object.assign({}, feat.properties, istRow);
+            matched++;
+          }
+        }
+
+        // if matched == 0 and istatData exists, try alternate join by numeric match (no leading zeros)
+        if (matched === 0 && istatData && istatData.resultset && istatData.resultset.length > 0) {
+          // create numeric map
+          const numMap = new Map();
+          for (const r of istatData.resultset) {
+            const num = String(r.PRO_COM || r.PRO_COM_T || '').replace(/\D/g,'');
+            if (num) numMap.set(num, r);
+          }
+          for (const feat of geojson.features) {
+            // try numeric without padding
+            const codeRaw = (feat.properties.PRO_COM || feat.properties.com_istat_code || feat.properties.pro_com || feat.properties.PRO_COM_T);
+            const n = codeRaw ? String(codeRaw).replace(/\D/g,'') : null;
+            if (n && numMap.has(n)) {
+              feat.properties = Object.assign({}, feat.properties, numMap.get(n));
+              matched++;
+            }
+          }
+        }
+
+        // 5) create Leaflet layer
+        geoLayer = L.geoJSON(geojson, {
+          style: styleFeature,
+          onEachFeature: function(feature, layer){
+            const p = feature.properties || {};
+            const comune = p.COMUNE || p.name || p.comune || p.NOME || '—';
+            const fua = p.DEN_FUA || p.COD_FUA || '—';
+            const provincia = p.DEN_UTS_COM || p.DEN_UTS || p.sigla || '—';
+            const regione = p.DEN_REG_COM || p.den_reg || '—';
+            const codice = p.PRO_COM_T || p.PRO_COM || p.pro_com_t || '—';
+            layer.bindPopup(`<strong>${comune}</strong><br/>FUA: ${fua}<br/>Provincia: ${provincia}<br/>Regione: ${regione}<br/>Codice ISTAT: ${codice}`);
+            layer.on({
+              mouseover: highlightFeature,
+              mouseout: resetHighlight,
+              click: zoomToFeature
+            });
+          }
+        }).addTo(map);
+
+        // fit bounds
+        if (geoLayer.getBounds && geoLayer.getBounds().isValid()) map.fitBounds(geoLayer.getBounds());
+
+        // 6) render legend
+        renderLegend();
+
+        // 7) footer info
+        const infoTxt = matched > 0 ? `${matched} comuni uniti ai dati ISTAT (FUA).` : 'Nessun comune unito ai dati ISTAT: probabilmente CORS o mismatch dei codici. Usa upload JSON come fallback.';
+
+      } catch (err) {
+        console.error('Errore processing:', err);
+        alert('Errore: ' + (err.message || err));
+      } finally {
+        loadingEl.style.display = 'none';
+      }
+    }
+
+
+    // initial load: try direct fetch, then fallback proxies are handled in loadAndRender
+    loadAndRender({ useProxy:false });
+
+  })();
+  </script>
+</body>
+</html>
