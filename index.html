@@ -1,10 +1,34 @@
 
 <!DOCTYPE html>
 <html lang="it">
-<head>
+  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mappa ISTAT FUA</title>
+  <meta name="description" content="Mappa interattiva delle Aree Funzionali Urbane (FUA) ISTAT, incentivi auto elettriche 2025, dati comuni italiani, fonti ufficiali e aggiornate.">
+  <meta name="keywords" content="FUA, ISTAT, mappa, incentivi auto, comuni italiani, geojson, aree funzionali urbane, elettrico, 2025, PNRR, incentivi, microimprese, ISEE, veicoli elettrici">
+  <meta name="author" content="movity.it">
+  <link rel="canonical" href="https://afu.movity.it/">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://movity.it/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://movity.it/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://movity.it/favicon-16x16.png">
+  <link rel="manifest" href="https://movity.it/site.webmanifest">
+  <link rel="mask-icon" href="https://movity.it/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <title>Mappa ISTAT delle Aree Funzionali Urbane e Incentivi Auto Elettriche 2025</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Mappa ISTAT FUA e Incentivi Auto Elettriche 2025" />
+  <meta property="og:description" content="Visualizza le Aree Funzionali Urbane ISTAT, incentivi auto elettriche, dati comuni italiani aggiornati." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://afu.movity.it/" />
+  <meta property="og:image" content="https://afu.movity.it/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Mappa ISTAT FUA e Incentivi Auto Elettriche 2025" />
+  <meta name="twitter:description" content="Visualizza le Aree Funzionali Urbane ISTAT, incentivi auto elettriche, dati comuni italiani aggiornati." />
+  <meta name="twitter:image" content="https://afu.movity.it/og-image.png" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -98,28 +122,40 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen flex flex-col">
   <!-- Header -->
-  <header class="relative overflow-hidden">
+
+  <header class="relative overflow-hidden shadow-sm" role="banner">
     <div class="glassmorphism border-b border-white/20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between py-4 flex-wrap gap-3">
-          <div class="flex items-center space-x-3">
-            
-            <img src="https://www.reshot.com/preview-assets/icons/UCYHESA36V/maps-UCYHESA36V.svg" alt="Logo mappa" class="w-10 h-10 rounded-xl shadow-md" />
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-              Mappa ISTAT Aree Funzionali Urbane | Beta
-            </h1>
-          </div>
-          <div class="hidden md:flex items-center space-x-3 text-sm text-slate-600">
-            <div class="flex items-center space-x-2">
-              <i data-lucide="database" class="w-4 h-4"></i>
-              <span>Dati ISTAT 2011</span>
-            </div>
-            <div class="w-px h-4 bg-slate-300"></div>
-            <div class="flex items-center space-x-2">
-              <i data-lucide="leaf" class="w-4 h-4 text-green-600"></i>
-              <span>Incentivi Auto 2025</span>
+        <div class="flex flex-col md:flex-row items-center justify-between py-4 gap-4 md:gap-8">
+          <div class="flex items-center gap-4">
+            <img src="https://www.reshot.com/preview-assets/icons/UCYHESA36V/maps-UCYHESA36V.svg" alt="Logo mappa ISTAT FUA" class="w-12 h-12 rounded-xl shadow-md" loading="lazy" />
+            <div>
+              <h1 class="text-3xl font-extrabold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
+                Mappa ISTAT delle Aree Funzionali Urbane <span class="sr-only">(FUA)</span>
+              </h1>
+              <p class="text-base text-slate-600 font-medium mt-1">Mobilità, incentivi auto elettriche</p>
             </div>
           </div>
+          <nav class="flex flex-col md:flex-row items-center gap-3 text-sm text-slate-700" aria-label="Informazioni principali">
+            <div class="flex items-center gap-2">
+              <i data-lucide="database" class="w-5 h-5 text-blue-600" aria-hidden="true"></i>
+              <span class="font-semibold">Dati ISTAT 2011</span>
+            </div>
+            <span class="hidden md:inline-block w-px h-5 bg-slate-300"></span>
+            <div class="flex items-center gap-2">
+              <i data-lucide="leaf" class="w-5 h-5 text-green-600" aria-hidden="true"></i>
+              <span class="font-semibold">Incentivi Auto 2025</span>
+            </div>
+            <span class="hidden md:inline-block w-px h-5 bg-slate-300"></span>
+            <div class="flex items-center gap-2">
+              <i data-lucide="scroll" class="w-5 h-5 text-indigo-600" aria-hidden="true"></i>
+              <a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-indigo-700 font-semibold hover:text-indigo-900">Normativa 2025</a>
+            </div>
+          </nav>
+        </div>
+        <div class="flex items-center justify-between mt-2 text-xs text-slate-500">
+          <span class="italic">Progetto open, usando anche AI a partire da fonti ufficiali</span>
+          <span class="hidden md:inline-block">Versione Beta • Ultimo aggiornamento: settembre 2025</span>
         </div>
       </div>
     </div>
@@ -127,7 +163,7 @@
 
   <!-- Contenuto -->
   <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
             <!-- Map Area -->
             <div class="lg:col-span-3">
@@ -140,122 +176,152 @@
                         </div>
                     </div>
                     <div id="map" style="height: 600px;" aria-label="Mappa interattiva dei comuni italiani"></div>
+                    <!-- Miglioramento accessibilità: aria-label già presente -->
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Search Panel -->
-<!--                <div class="glassmorphism rounded-2xl p-6 animate-slide-up">
-                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
-                        <i data-lucide="search" class="w-5 h-5 mr-2 text-blue-600"></i>
-                        Ricerca Comune
-                    </h3>
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="search-comune" 
-                            class="w-full px-4 py-3 pr-10 bg-white/70 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent search-input transition-all duration-200"
-                            placeholder="Inserisci nome comune..."
-                        />
-                        <i data-lucide="map-pin" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                    </div>
-                </div>-->
-
-                <!-- Legend Panel -->
-                <div class="glassmorphism rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.1s">
-                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
-                        <i data-lucide="palette" class="w-5 h-5 mr-2 text-blue-600"></i>
+            <!-- Sidebar migliorata -->
+            <aside class="lg:col-span-1 flex flex-col gap-8" aria-label="Informazioni e incentivi">
+                <!-- Legenda FUA -->
+                <section class="glassmorphism rounded-2xl p-6 animate-slide-up flex flex-col gap-2" style="animation-delay: 0.1s" aria-labelledby="legend-title">
+                    <h2 id="legend-title" class="text-lg font-bold text-blue-700 mb-2 flex items-center">
+                        <i data-lucide="palette" class="w-6 h-6 mr-2 text-blue-600" aria-hidden="true"></i>
                         Legenda FUA
-                    </h3>
+                    </h2>
                     <div id="legend" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar"></div>
-                </div>
+                </section>
 
-                <!-- Incentives Info Panel -->
-                <div class="glassmorphism rounded-2xl p-6 animate-slide-up" style="animation-delay: 0.2s">
-                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center">
-                        <i data-lucide="zap" class="w-5 h-5 mr-2 text-green-600"></i>
-                        Incentivi Veicoli Elettrici 2025
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                            <div class="flex items-center mb-2">
-                                <i data-lucide="users" class="w-4 h-4 text-blue-600 mr-2"></i>
-                                <span class="text-sm font-medium text-blue-800">Persone Fisiche (M1)</span>
-                            </div>
-                            <p class="text-xs text-blue-700 mb-1">• €11.000 se ISEE ≤ €30.000</p>
-                            <p class="text-xs text-blue-700">• €9.000 se ISEE €30.000-€40.000</p>
-                            <p class="text-xs text-slate-600 mt-1">Solo residenti in FUA, con rottamazione Euro ≤5</p>
-                        </div>
-                        
-                        <div class="bg-green-50 border border-green-200 rounded-xl p-3">
-                            <div class="flex items-center mb-2">
-                                <i data-lucide="building" class="w-4 h-4 text-green-600 mr-2"></i>
-                                <span class="text-sm font-medium text-green-800">Microimprese (N1/N2)</span>
-                            </div>
-                            <p class="text-xs text-green-700 mb-1">• 30% del prezzo (max €20.000)</p>
-                            <p class="text-xs text-green-700">• Max 2 veicoli per impresa</p>
-                            <p class="text-xs text-slate-600 mt-1">Sede in FUA, regime de minimis</p>
-                        </div>
-                        
-                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                            <div class="flex items-center mb-2">
-                                <i data-lucide="info" class="w-4 h-4 text-amber-600 mr-2"></i>
-                                <span class="text-sm font-medium text-amber-800">Requisiti</span>
-                            </div>
-                            <p class="text-xs text-amber-700 mb-1">• Scadenza: 30 giugno 2026</p>
-                            <p class="text-xs text-amber-700">• Dotazione: €597.320.000</p>
-                            <p class="text-xs text-slate-600 mt-1">PNRR M2C2 - Investimento 4.5</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Incentivi Veicoli Elettrici 2025 -->
+                <section class="glassmorphism rounded-2xl p-6 animate-slide-up flex flex-col gap-2" style="animation-delay: 0.2s" aria-labelledby="incentivi-title">
+                  <h2 id="incentivi-title" class="text-lg font-bold text-green-700 mb-2 flex items-center">
+                    <i data-lucide="zap" class="w-6 h-6 mr-2 text-green-600" aria-hidden="true"></i>
+                    Incentivi Veicoli Elettrici 2025
+                  </h2>
+                  <ul class="space-y-4">
+                    <li class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <div class="flex items-center mb-2">
+                        <i data-lucide="users" class="w-6 h-6 text-blue-600 mr-2" aria-hidden="true"></i>
+                        <span class="text-base font-semibold text-blue-800">Persone Fisiche (M1)</span>
+                      </div>
+                      <ul class="list-disc pl-5 text-xs text-blue-700 mb-2">
+                        <li>€11.000 se ISEE ≤ €30.000</li>
+                        <li>€9.000 se ISEE €30.000-€40.000</li>
+                      </ul>
+                      <p class="text-xs text-slate-600 mt-1">Solo residenti in FUA, con rottamazione Euro ≤5</p>
+                    </li>
+                    <li class="bg-green-50 border border-green-200 rounded-xl p-4">
+                      <div class="flex items-center mb-2">
+                        <i data-lucide="building" class="w-6 h-6 text-green-600 mr-2" aria-hidden="true"></i>
+                        <span class="text-base font-semibold text-green-800">Microimprese (N1/N2)</span>
+                      </div>
+                      <ul class="list-disc pl-5 text-xs text-green-700 mb-2">
+                        <li>30% del prezzo (max €20.000)</li>
+                        <li>Max 2 veicoli per impresa</li>
+                      </ul>
+                      <p class="text-xs text-slate-600 mt-1">Sede in FUA, regime <a href="https://europa.eu/youreurope/business/finance-funding/funding-programmes/de-minimis-aid/index_it.htm" target="_blank" rel="noopener" class="underline text-green-700">de minimis</a></p>
+                    </li>
+                    <li class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                      <div class="flex items-center mb-2">
+                        <i data-lucide="info" class="w-6 h-6 text-amber-600 mr-2" aria-hidden="true"></i>
+                        <span class="text-base font-semibold text-amber-800">Requisiti e Dettagli</span>
+                      </div>
+                      <ul class="list-disc pl-5 text-xs text-amber-700 mb-2">
+                        <li>Scadenza: 30 giugno 2026</li>
+                        <li>Dotazione: €597.320.000</li>
+                        <li>Fonte: <a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-amber-700">Decreto in Gazzetta Ufficiale</a></li>
+                      </ul>
+                      <p class="text-xs text-slate-600 mt-1">PNRR M2C2 - Investimento 4.5</p>
+                    </li>
+                  </ul>
+                </section>
+            </aside>
             </div>
         </div>
 
-    <!-- Footer Info -->
-    <div class="mt-8 glassmorphism rounded-2xl p-6 animate-fade-in" style="animation-delay: 0.3s">
+    <!-- Sezione Normativa -->
+    <section class="mt-8 glassmorphism rounded-2xl p-6 animate-fade-in" style="animation-delay: 0.2s" aria-labelledby="normativa-title">
+      <h2 id="normativa-title" class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+        <i data-lucide="scroll" class="w-7 h-7 mr-2 text-indigo-600" aria-hidden="true"></i>
+        Normativa di riferimento e dettagli
+      </h2>
+      <div class="space-y-5 text-slate-800 text-base">
+        <p>Questa sezione è stata redatta automaticamente tramite intelligenza artificiale, a partire dal testo ufficiale della legge pubblicata in <strong>Gazzetta Ufficiale</strong> (<a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-indigo-700 font-semibold">Decreto 25A04872</a>). La finalità è offrire una sintesi chiara e aggiornata dei principali contenuti normativi e delle opportunità per cittadini e imprese.</p>
+        <h3 class="font-semibold text-indigo-700 text-lg mt-4 mb-2">Finalità della legge</h3>
+        <ul class="list-disc pl-6 mb-3">
+          <li>Promuovere la transizione ecologica e la mobilità sostenibile attraverso incentivi all'acquisto di veicoli elettrici e a basse emissioni.</li>
+          <li>Favorire la rottamazione di veicoli inquinanti e il rinnovo del parco auto nazionale.</li>
+          <li>Sostenere le microimprese nella conversione verso veicoli commerciali ecologici.</li>
+        </ul>
+        <h3 class="font-semibold text-indigo-700 text-lg mt-4 mb-2">Destinatari e requisiti</h3>
+        <ul class="list-disc pl-6 mb-3">
+          <li><strong>Persone fisiche:</strong> residenti in FUA, con ISEE fino a €40.000 e rottamazione di veicoli Euro 5 o inferiori. Incentivo fino a €11.000 per ISEE ≤ €30.000, €9.000 per ISEE tra €30.000 e €40.000.</li>
+          <li><strong>Microimprese:</strong> sede in FUA, regime <a href="https://europa.eu/youreurope/business/finance-funding/funding-programmes/de-minimis-aid/index_it.htm" target="_blank" rel="noopener" class="underline text-green-700">de minimis</a>, contributo pari al 30% del prezzo (max €20.000), massimo 2 veicoli per impresa.</li>
+        </ul>
+        <h3 class="font-semibold text-indigo-700 text-lg mt-4 mb-2">Procedura e scadenze</h3>
+        <ul class="list-disc pl-6 mb-3">
+          <li>Domande presentabili tramite piattaforma online dedicata, con verifica automatica dei requisiti.</li>
+          <li>Dotazione finanziaria complessiva: <strong>€597.320.000</strong>.</li>
+          <li>Scadenza per la presentazione delle domande: <strong>30 giugno 2026</strong>.</li>
+        </ul>
+        <h3 class="font-semibold text-indigo-700 text-lg mt-4 mb-2">Fonti e trasparenza</h3>
+        <ul class="list-disc pl-6 mb-3">
+          <li>I dati visualizzati sono aggregati da fonti pubbliche ISTAT e amministrative, e vengono aggiornati periodicamente.</li>
+          <li>La generazione automatica dei contenuti tramite AI garantisce trasparenza, imparzialità e aggiornamento costante.</li>
+          <li>Per approfondimenti e testo integrale, consultare la <a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-indigo-700 font-semibold">Gazzetta Ufficiale</a> e gli atti ufficiali.</li>
+        </ul>
+        <h3 class="font-semibold text-indigo-700 text-lg mt-4 mb-2">Avvertenze e note</h3>
+        <ul class="list-disc pl-6 mb-3">
+          <li>Questa sintesi non ha valore legale e non sostituisce la consultazione degli atti ufficiali.</li>
+          <li>La sezione è stata generata tramite AI per facilitare la comprensione e la diffusione delle informazioni.</li>
+        </ul>
+      </div>
+    </section>
+    <section class="mt-8 glassmorphism rounded-2xl p-6 animate-fade-in" style="animation-delay: 0.3s" aria-labelledby="footer-info-title">
+      <h2 id="footer-info-title" class="sr-only">Informazioni e fonti</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="space-y-3">
-          <h4 class="font-semibold text-slate-900 flex items-center">
-            <i data-lucide="database" class="w-5 h-5 mr-2 text-blue-600"></i>
+        <!-- Fonti Dati -->
+        <article class="bg-blue-50 border border-blue-200 rounded-xl p-5 flex flex-col h-full" aria-labelledby="fonti-title">
+          <h3 id="fonti-title" class="font-semibold text-blue-800 flex items-center text-lg mb-2">
+            <i data-lucide="database" class="w-6 h-6 mr-2 text-blue-600" aria-hidden="true"></i>
             Fonti Dati
-          </h4>
-          <div class="space-y-2 text-sm text-slate-600">
-            <p>• Confini comuni: <a href="https://www.confini-amministrativi.it" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 transition-colors">OnData - Confini Amministrativi Italiani</a></p>
-            <p>• Zone FUA: <a href="https://situas-servizi.istat.it/publish/reportspooljson?pfun=91&pdata=01/01/2018" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800">ISTAT</a></p>
-          </div>
-        </div>
+          </h3>
+          <ul class="space-y-2 text-sm text-blue-700 pl-1">
+            <li><strong>Confini comuni:</strong> <a href="https://www.confini-amministrativi.it" target="_blank" rel="noopener" class="underline hover:text-blue-900">OnData - Confini Amministrativi Italiani</a></li>
+            <li><strong>Zone FUA:</strong> <a href="https://situas-servizi.istat.it/publish/reportspooljson?pfun=91&pdata=01/01/2018" target="_blank" rel="noopener" class="underline hover:text-blue-900">ISTAT</a></li>
+          </ul>
+        </article>
 
-        <div class="space-y-3">
-          <h4 class="font-semibold text-slate-900 flex items-center">
-            <i data-lucide="info" class="w-5 h-5 mr-2 text-blue-600"></i>
+        <!-- Informazioni -->
+        <article class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col h-full" aria-labelledby="info-title">
+          <h3 id="info-title" class="font-semibold text-slate-900 flex items-center text-lg mb-2">
+            <i data-lucide="info" class="w-6 h-6 mr-2 text-blue-600" aria-hidden="true"></i>
             Informazioni
-          </h4>
-          <div class="text-sm text-slate-600">
-            <p>Mappa interattiva delle Aree Funzionali Urbane (FUA) ISTAT Comuni e zone aggiornati al 2011</p>
-          </div>
-        </div>
+          </h3>
+          <p class="text-sm text-slate-700">Mappa interattiva delle Aree Funzionali Urbane (FUA) ISTAT. Comuni e zone aggiornati al 2011. Progetto open source, dati pubblici e trasparenti.</p>
+        </article>
 
-        <div class="space-y-3">
-          <h4 class="font-semibold text-slate-900 flex items-center">
-            <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-amber-600"></i>
+        <!-- Disclaimer -->
+        <article class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex flex-col h-full" aria-labelledby="disclaimer-title">
+          <h3 id="disclaimer-title" class="font-semibold text-amber-800 flex items-center text-lg mb-2">
+            <i data-lucide="alert-triangle" class="w-6 h-6 mr-2 text-amber-600" aria-hidden="true"></i>
             Disclaimer
-          </h4>
-          <div class="text-sm text-slate-600">
+          </h3>
+          <div class="text-sm text-slate-700">
             <p class="text-amber-700 font-medium">Questo sito non è ufficiale.</p>
             <p>I dati sugli incentivi sono estratti da fonti governative aggiornate a settembre 2025.</p>
-            <p><a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-blue-700">Decreto in Gazzetta Ufficiale</a>.</p>
+            <p>Normativa: <a href="https://www.gazzettaufficiale.it/eli/id/2025/09/08/25A04872/sg" target="_blank" rel="noopener" class="underline text-amber-700 hover:text-amber-900">Decreto in Gazzetta Ufficiale</a></p>
           </div>
-        </div>
+        </article>
       </div>
-    </div>
+    </section>
+    
   </main>
 
-<footer class="bg-white border-t border-slate-200 py-6">
+<footer class="bg-white border-t border-slate-200 py-6" role="contentinfo">
   <div class="max-w-7xl mx-auto px-4 flex flex-col items-center text-sm text-slate-600 space-y-3">
     <div class="flex items-center justify-center space-x-2 text-center">
       <span class="font-semibold">un progetto open</span>
-      <img src="https://i.movity.it/movity.png" alt="movity logo" class="h-[20px] object-contain">
+  <img src="https://i.movity.it/movity.png" alt="Logo Movity" class="h-[20px] object-contain" loading="lazy">
     </div>
 
 
