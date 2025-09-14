@@ -164,9 +164,9 @@
   <!-- Contenuto -->
   <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Map Area -->
-            <div class="lg:col-span-3">
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">
+            <!-- Map Area allargata -->
+            <div class="">
                 <div class="glassmorphism rounded-2xl p-6 map-container animate-fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-slate-900">Mappa Interattiva dei Comuni</h2>
@@ -175,22 +175,28 @@
                             <span>Aree Funzionali Urbane</span>
                         </div>
                     </div>
-                    <div id="map" style="height: 600px;" aria-label="Mappa interattiva dei comuni italiani"></div>
+                    <div id="map" style="height: 700px; width: 100%;" aria-label="Mappa interattiva dei comuni italiani"></div>
                     <!-- Miglioramento accessibilità: aria-label già presente -->
                 </div>
-            </div>
-
-            <!-- Sidebar migliorata -->
-            <aside class="lg:col-span-1 flex flex-col gap-8" aria-label="Informazioni e incentivi">
-                <!-- Legenda FUA -->
-                <section class="glassmorphism rounded-2xl p-6 animate-slide-up flex flex-col gap-2" style="animation-delay: 0.1s" aria-labelledby="legend-title">
-                    <h2 id="legend-title" class="text-lg font-bold text-blue-700 mb-2 flex items-center">
-                        <i data-lucide="palette" class="w-6 h-6 mr-2 text-blue-600" aria-hidden="true"></i>
-                        Legenda FUA
+                <!-- Elenco FUA sotto la mappa -->
+                <section class="glassmorphism rounded-2xl p-6 mt-6 animate-slide-up" style="animation-delay: 0.1s" aria-labelledby="elenco-fua-title">
+                    <h2 id="elenco-fua-title" class="text-lg font-bold text-blue-700 mb-4 flex items-center">
+                        <i data-lucide="list" class="w-6 h-6 mr-2 text-blue-600" aria-hidden="true"></i>
+                        Elenco FUA e Comuni
                     </h2>
-                    <div id="legend" class="space-y-2 max-h-80 overflow-y-auto custom-scrollbar"></div>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                      <div class="flex-1">
+                        <label for="comune-search" class="block text-sm font-medium text-slate-700 mb-1">Cerca Comune</label>
+                        <input id="comune-search" type="text" placeholder="Digita il nome del comune..." class="w-full rounded-lg border border-blue-200 p-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                      </div>
+                    </div>
+                    <div id="elenco-fua" class="space-y-4">
+                        <!-- Qui verrà generato dinamicamente l'elenco filtrato -->
+                    </div>
                 </section>
-
+            </div>
+            <!-- Sidebar solo incentivi -->
+            <aside class="w-full flex flex-col gap-8" aria-label="Informazioni e incentivi">
                 <!-- Incentivi Veicoli Elettrici 2025 -->
                 <section class="glassmorphism rounded-2xl p-6 animate-slide-up flex flex-col gap-2" style="animation-delay: 0.2s" aria-labelledby="incentivi-title">
                   <h2 id="incentivi-title" class="text-lg font-bold text-green-700 mb-2 flex items-center">
@@ -363,7 +369,6 @@
 
     // UI refs
     const loadingEl = document.getElementById('loading');
-    const legendEl = document.getElementById('legend');
     const uploadIstat = document.getElementById('upload-istat');
     const uploadGeo = document.getElementById('upload-geo');
     const proxySelect = document.getElementById('istat-proxy');
@@ -475,16 +480,6 @@
       e.target.openPopup();
     }
 
-    // populate legend (fuaColorMap)
-    function renderLegend() {
-      const items = Object.keys(fuaColorMap).sort((a,b)=>a.localeCompare(b)).map(fua=>{
-        return `<div style="display:flex;align-items:center;margin:4px 0">
-          <span style="width:16px;height:12px;background:${fuaColorMap[fua]};display:inline-block;margin-right:8px;border:1px solid #999"></span>
-          <small>${fua}</small>
-        </div>`;
-      }).join('');
-      legendEl.innerHTML = items || '<small class="text-muted">Legenda non disponibile</small>';
-    }
 
     // join logic: istatData.resultset -> map by normalized code
     function buildIstatMap(istatData) {
@@ -516,7 +511,6 @@
       fuaCounter = 0;
       for (const k in fuaColorMap) delete fuaColorMap[k];
       if (geoLayer) { map.removeLayer(geoLayer); geoLayer = null; }
-      legendEl.innerHTML = '';
       info.update();
 
       loadingEl.style.display = 'flex';
@@ -613,8 +607,7 @@
         // fit bounds
         if (geoLayer.getBounds && geoLayer.getBounds().isValid()) map.fitBounds(geoLayer.getBounds());
 
-        // 6) render legend
-        renderLegend();
+        renderElencoFua(geojson);
 
         // 7) footer info
         const infoTxt = matched > 0 ? `${matched} comuni uniti ai dati ISTAT (FUA).` : 'Nessun comune unito ai dati ISTAT: probabilmente CORS o mismatch dei codici. Usa upload JSON come fallback.';
@@ -628,8 +621,94 @@
     }
 
 
+    // Funzione per generare l'elenco FUA e comuni
+    function renderElencoFua(geojson) {
+      const elencoFuaEl = document.getElementById('elenco-fua');
+      const comuneSearch = document.getElementById('comune-search');
+      if (!elencoFuaEl || !comuneSearch) return;
+      if (!geojson || !geojson.features || geojson.features.length === 0) {
+        elencoFuaEl.innerHTML = '<div class="text-slate-500 italic">Nessun dato disponibile per le aree FUA.</div>';
+        return;
+      }
+      // Raggruppa comuni per FUA
+      const fuaMap = {};
+      geojson.features.forEach(feat => {
+        const props = feat.properties || {};
+        const fua = props.DEN_FUA || props.COD_FUA || 'Senza FUA';
+        const comune = props.COMUNE || props.name || props.comune || props.NOME || '—';
+        if (!fuaMap[fua]) fuaMap[fua] = [];
+        fuaMap[fua].push(comune);
+      });
+      // Ordina FUA alfabeticamente
+      const fuaList = Object.keys(fuaMap).sort((a,b)=>a.localeCompare(b));
+      // Stato di apertura dei dropdown
+      let openFua = null;
+      // Funzione per ottenere il colore della FUA
+      function getFuaColor(fua) {
+        if (typeof getColorForFua === 'function') return getColorForFua(fua);
+        // fallback
+        return '#3b82f6';
+      }
+      // Funzione di rendering
+      function renderDropdown() {
+        const searchTerm = comuneSearch.value.trim().toLowerCase();
+        // Mostra solo le FUA che hanno almeno un comune che corrisponde
+        const visibleFuaList = fuaList.filter(fua => fuaMap[fua].some(c => c.toLowerCase().includes(searchTerm)));
+        elencoFuaEl.innerHTML = visibleFuaList.map(fua => {
+          // Filtra i comuni per ricerca
+          const comuni = fuaMap[fua].filter(c => c.toLowerCase().includes(searchTerm)).sort((a,b)=>a.localeCompare(b));
+          const color = getFuaColor(fua);
+          return `<div class="border border-blue-100 rounded-xl mb-2">
+            <button type="button" class="w-full flex items-center justify-between px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-t-xl focus:outline-none" aria-expanded="false" aria-controls="fua-list-${fua.replace(/\W/g,'_')}">
+              <span class="flex items-center"><i data-lucide='map-pin' class='w-5 h-5 mr-1' style='color:${color}'></i> <span class="font-semibold" style="color:${color}">${fua}</span></span>
+              <svg class="w-4 h-4 ml-2 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div id="fua-list-${fua.replace(/\W/g,'_')}" class="overflow-hidden transition-all duration-200" style="max-height:0;">
+              <ul class="list-disc pl-8 pr-4 py-2 text-sm text-slate-700 mb-2">
+                ${comuni.length > 0 ? comuni.map(c => `<li>${c}</li>`).join('') : '<li class="italic text-slate-400">Nessun comune trovato</li>'}
+              </ul>
+            </div>
+          </div>`;
+        }).join('');
+        if (window.lucide) lucide.createIcons();
+        // Eventi per i bottoni (espansione manuale)
+        visibleFuaList.forEach(fua => {
+          const btn = elencoFuaEl.querySelector(`button[aria-controls='fua-list-${fua.replace(/\W/g,'_')}']`);
+          const div = elencoFuaEl.querySelector(`#fua-list-${fua.replace(/\W/g,'_')}`);
+          if (btn && div) {
+            btn.onclick = function() {
+              const expanded = div.style.maxHeight !== '0px';
+              div.style.maxHeight = expanded ? '0' : '1000px';
+              btn.setAttribute('aria-expanded', (!expanded).toString());
+            };
+          }
+        });
+      }
+      // Event listener ricerca
+      comuneSearch.oninput = function() {
+        renderDropdown();
+      };
+      // Render iniziale
+      renderDropdown();
+    }
+
     // initial load: try direct fetch, then fallback proxies are handled in loadAndRender
     loadAndRender({ useProxy:false });
+
+    // Modifica loadAndRender per chiamare renderElencoFua
+    const oldLoadAndRender = loadAndRender;
+    loadAndRender = async function(opts) {
+      // Chiama la funzione originale
+      await oldLoadAndRender.call(this, opts);
+      // Dopo aver caricato geojson, prova a generare elenco FUA
+      try {
+        // geoLayer è globale, recupera geojson dai layer
+        if (geoLayer && geoLayer.toGeoJSON) {
+          const geojson = geoLayer.toGeoJSON();
+          renderElencoFua(geojson);
+        }
+      } catch(e) { /* silenzia errori */ }
+    }
 
   })();
   </script>
